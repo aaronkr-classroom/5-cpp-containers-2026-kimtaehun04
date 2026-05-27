@@ -10,5 +10,6 @@
 using std::string; using std::vector;
 
 vector<string> split(const string&); //문자열 분할 함수
+vector<string>lib_split(const string&); //라이브러리 함수로 문자열 분할
 
 #endif

@@ -17,7 +17,7 @@ struct Student_info {
 };
 
 // 함수 원형 정의
-istream& read_(istream&, Student_info); // 한 학생의 정보 알기
+istream& read(istream&, Student_info&); // 한 학생의 정보 읽기
 istream& read(istream&, vector<double>&);
 istream& read_hw(istream&, vector<double>&); // 모든 과제 점수 읽기
 #endif

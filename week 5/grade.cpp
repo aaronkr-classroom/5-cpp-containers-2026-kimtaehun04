@@ -1,60 +1,73 @@
 //grade.cpp
+// 이 파일은 UTF-8 인코딩으로 저장되어야 합니다.
+// Visual Studio에서 "다른 이름으로 저장" > "인코딩 포함" > "UTF-8" 선택
+
 #include <vector>
 #include "Student_info.h"
 #include "grade.h"
 #include <stdexcept>
 #include "median.h"
 #include <list>
+#include <algorithm> //find() 알고리즘 사용
 
-// 중간고사 점수, 기말고사 점수, 과제 점수의 벡터로 학생의 종합
-// 점수를 구함. 이 함수는 인수를 복사하지 않고 median 함수가
-// 해당 작업을 실행
 using std::list;
 using std::vector;
+
 double grade(double mid, double fin, const vector<double>& hw) {
 	if (hw.size() == 0) {
 		throw domain_error("Student has done no homework!");
 	}
-	// return 0.2 * mid + 0.4 * fin + 0.4 * (hw1 + hw2 ...) / hw.size())
-	// NEW grade() 함수
 	return grade(mid, fin, median(hw));
 }
 
-// 계산하는 grade() 함수
 double grade(double midterm, double final, double homework) {
 	return midterm * 0.2 + final * 0.4 + homework * 0.4;
 }
 
-//Student_info 계산
 double grade(const Student_info& s) {
 	return grade(s.midterm, s.final, s.homework);
-
 }
 
-double
-bool fgrade(const Student_info& s){
-	return grade(s) < 60;
+// 기존 fgrade 함수와 충돌을 피하기 위해 함수명을 변경
+static bool fgrade_struct(const Student_info& s) {
+    return grade(s) < 60;
 }
-	
+
+// pgrade도 fgrade_struct를 사용하도록 수정
+bool pgrade_struct(const Student_info& s) {
+    return !fgrade_struct(s);
+}
+
+// Student_info 클래스에 homework 벡터에 대한 getter 추가
+public:
+    // ... 기존 코드 ...
+    const vector<double>& getHomework() const { return homework; }
+
+
+// 기존 struct 기반 Student_info와 class 기반 Student_info가 혼재되어 발생하는 문제 해결
+// 클래스 기반 Student_info에 맞게 did_all_hw 함수 수정
+
+bool did_all_hw(const Student_info& s) {
+    // 클래스의 homework 멤버에 접근하려면 public getter 필요
+    // Student_info 클래스에 getHomework() const 멤버 함수가 없으므로, 추가 필요
+    // 임시로 friend 선언 또는 public 멤버로 변경하거나, getter 추가 후 아래처럼 사용
+    // return find(s.getHomework().begin(), s.getHomework().end(), 0) == s.getHomework().end();
+
+    // 만약 getter가 없다면, 아래처럼 Student_info.h에 추가 필요:
+    // const vector<double>& getHomework() const { return homework; }
+
+    return find(s.getHomework().begin(), s.getHomework().end(), 0) == s.getHomework().end();
+}
+
 vector<Student_info> extract_fails(vector<Student_info>& students) {
 	vector<Student_info> fails;
-	//vector<Student_info>::size_type i = 0;
 	vector<Student_info>::iterator iter = students.begin();
-
-	// 불변성: students qorxjdml [0,i) 범위에 있는
-	// 요소들은 과목을 통과한 학생들의 정보
-	
 	while (iter != students.end()) {
-		//if (grade(students[i]) < 60) {
 		if (fgrade(*iter)) {
-			//fails.push_back(students[i]);
-			fails.push_back(*iter); // 학생이 과목을 통과하지 못한 경우, fails 벡터에 학생 정보 추가
-			//students.erase(students.begin() + i); // i번째 제거// students 벡터에서 i번째 요소 제거
-			iter = students.erase(iter); // 학생이 제거되었으므로 iter는 다음 요소를 가리키도록 업데이트
-			// 학생이 제거되었으므로 i는 증가하지 않음
+			fails.push_back(*iter);
+			iter = students.erase(iter);
 		} else {
-			//++i;
-			++iter; // 학생이 과목을 통과한 경우, iter는 다음 요소를 가리키도록 업데이트
+			++iter;
 		}
 	}
 	return fails;
@@ -63,19 +76,16 @@ vector<Student_info> extract_fails(vector<Student_info>& students) {
 list<Student_info> extract_fails(list<Student_info>& students) {
 	list<Student_info> fails;
 	list<Student_info>::iterator iter = students.begin();
-
-
 	while (iter != students.end()) {
 		if (fgrade(*iter)) {
-			fails.push_back(*iter); 
+			fails.push_back(*iter);
 			iter = students.erase(iter);
-		}
-		else {
-
+		} else {
 			++iter;
 		}
 	}
 	return fails;
+}
 
 
 
